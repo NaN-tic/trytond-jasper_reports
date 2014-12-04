@@ -25,18 +25,19 @@ import net.sf.jasperreports.engine.JREmptyDataSource;
 
 // Exporters
 import net.sf.jasperreports.engine.JRAbstractExporter;
-import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.export.HtmlExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRRtfExporter;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
-import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.JRTextExporter;
-import net.sf.jasperreports.engine.export.JRTextExporterParameter;
-import net.sf.jasperreports.engine.export.JRHtmlExporter;
-import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 import net.sf.jasperreports.engine.export.oasis.JROdtExporter;
 import net.sf.jasperreports.engine.export.oasis.JROdsExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleHtmlExporterConfiguration;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimpleTextReportConfiguration;
+import net.sf.jasperreports.export.SimpleXlsReportConfiguration;
 
 import java.text.NumberFormat;
 import java.lang.Object;
@@ -111,7 +112,7 @@ public class JasperServer {
 		// Ensure report is compiled
 		compile( jrxmlPath );
 
-		report = (JasperReport) JRLoader.loadObject( jasperPath( jrxmlPath ) );
+		report = (JasperReport) JRLoader.loadObjectFromFile(jasperPath(jrxmlPath));
 
 		// Declare it outside the parameters loop because we'll use it when we will create the data source.
 		Translator translator = null;
@@ -212,20 +213,24 @@ public class JasperServer {
 
 		System.out.println( "JasperServer: Exporting..." );
 		if ( output.equalsIgnoreCase( "html" ) ) {
-			exporter = new JRHtmlExporter();
-			exporter.setParameter(JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN, Boolean.FALSE);
-			exporter.setParameter(JRHtmlExporterParameter.HTML_HEADER, "");
-			exporter.setParameter(JRHtmlExporterParameter.BETWEEN_PAGES_HTML, "");
-			exporter.setParameter(JRHtmlExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
-			exporter.setParameter(JRHtmlExporterParameter.HTML_FOOTER, "");
+			exporter = new HtmlExporter();
+			// exporter.setParameter(JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN, Boolean.FALSE);
+			// exporter.setParameter(JRHtmlExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
+            SimpleHtmlExporterConfiguration exporterConfiguration = new SimpleHtmlExporterConfiguration();
+            exporterConfiguration.setHtmlHeader("");
+            exporterConfiguration.setHtmlFooter("");
+            exporterConfiguration.setBetweenPagesHtml("");
+            exporter.setConfiguration(exporterConfiguration);
 		} else if ( output.equalsIgnoreCase( "csv" ) ) {
 			exporter = new JRCsvExporter();
 		} else if ( output.equalsIgnoreCase( "xls" ) ) {
 			exporter = new JRXlsExporter();
-			exporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_COLUMNS, Boolean.TRUE);
-			exporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
-			exporter.setParameter(JRXlsExporterParameter.IS_DETECT_CELL_TYPE, Boolean.TRUE);
-			exporter.setParameter(JRXlsExporterParameter.IS_WHITE_PAGE_BACKGROUND, Boolean.FALSE);
+            SimpleXlsReportConfiguration exporterConfiguration = new SimpleXlsReportConfiguration();
+            exporterConfiguration.setRemoveEmptySpaceBetweenColumns(Boolean.TRUE);
+            exporterConfiguration.setRemoveEmptySpaceBetweenRows(Boolean.TRUE);
+            exporterConfiguration.setDetectCellType(Boolean.TRUE);
+            exporterConfiguration.setWhitePageBackground(Boolean.TRUE);
+            exporter.setConfiguration(exporterConfiguration);
 		} else if ( output.equalsIgnoreCase( "rtf" ) ) {
 			exporter = new JRRtfExporter();
 		} else if ( output.equalsIgnoreCase( "odt" ) ) {
@@ -234,13 +239,15 @@ public class JasperServer {
 			exporter = new JROdsExporter();
 		} else if ( output.equalsIgnoreCase( "txt" ) ) {
 			exporter = new JRTextExporter();
-			exporter.setParameter(JRTextExporterParameter.PAGE_WIDTH, new Integer(80));
-			exporter.setParameter(JRTextExporterParameter.PAGE_HEIGHT, new Integer(150));
+            SimpleTextReportConfiguration exporterConfiguration = new SimpleTextReportConfiguration();
+            exporterConfiguration.setPageWidthInChars(new Integer(80));
+            exporterConfiguration.setPageHeightInChars(new Integer(150));
+            exporter.setConfiguration(exporterConfiguration);
 		} else {
 			exporter = new JRPdfExporter();
 		}
-		exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-		exporter.setParameter(JRExporterParameter.OUTPUT_FILE, outputFile);
+        exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+		exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFile));
 		exporter.exportReport();
 		System.out.println( "JasperServer: Exported." );
 		return jasperPrint.getPages().size(); 

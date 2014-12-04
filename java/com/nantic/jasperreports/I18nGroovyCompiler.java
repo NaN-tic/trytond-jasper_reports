@@ -1,7 +1,6 @@
 package com.nantic.jasperreports;
 
-import net.sf.jasperreports.engine.JRDefaultScriptlet;
-import net.sf.jasperreports.engine.design.JRCompilationUnit;
+import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.compilers.JRGroovyCompiler;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.design.JRSourceCompileTask;
@@ -14,6 +13,7 @@ import net.sf.jasperreports.engine.design.JRDesignExpressionChunk;
 import net.sf.jasperreports.engine.JRReport;
 import net.sf.jasperreports.engine.JasperReportsContext;
 
+import java.lang.Thread;
 import java.util.List;
 
 public class I18nGroovyCompiler extends JRGroovyCompiler {
@@ -129,7 +129,7 @@ public class I18nGroovyCompiler extends JRGroovyCompiler {
 		"}\n";
 
 	public I18nGroovyCompiler() {
-		super();
+		super(DefaultJasperReportsContext.getInstance());
 	}
 
 	public I18nGroovyCompiler(JasperReportsContext context) {

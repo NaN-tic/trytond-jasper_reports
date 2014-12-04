@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -z "$JAVA_HOME" ]; then
-	directories="/usr/lib/jvm/java-6-sun-1.6.0.10/bin /usr/lib/j2sdk1.6-sun /usr/lib/j2sdk1.5-sun"
+	directories="/usr/lib/jvm/java-7-openjdk-amd64/bin /usr/lib/j2sdk1.6-sun /usr/lib/j2sdk1.5-sun"
 	for d in $directories; do
 		if [ -d "$d" ]; then
 			export JAVA_HOME="$d"
@@ -16,11 +16,13 @@ export CLASSPATH="$CLASSPATH":$scriptdir
 
 FILES=$(find com -iname "*.java")
 
-javac $FILES || exit
+echo "Compiling com.nantic.jasperreports.JasperServer"
+javac -Xlint:deprecation $FILES || exit
 
 rm -f lib/i18n.jar
 rm -f i18n.jar
 jar cvf i18n.jar com
 mv i18n.jar lib
 
+echo "Executing com.nantic.jasperreports.JasperServer"
 java com.nantic.jasperreports.JasperServer
