@@ -39,8 +39,8 @@ class CsvRecordDataGenerator(AbstractDataGenerator):
                             print "FIELD '%s' NOT FOUND IN REPORT." % field
                             error_reported_fields.append(field)
                         continue
-                    value = record.get(field, False)
-                    if value is False:
+                    value = record.get(field, None)
+                    if value is None:
                         value = ''
                     elif isinstance(value, unicode):
                         value = value.encode('utf-8')
@@ -72,7 +72,7 @@ class XmlRecordDataGenerator(AbstractDataGenerator):
                 fieldNode = self.document.createElement(field)
                 recordNode.appendChild(fieldNode)
                 # The rest of field types must be converted into str
-                if value is False:
+                if value is None:
                     value = ''
                 elif isinstance(value, str):
                     value = unicode(value, 'utf-8')

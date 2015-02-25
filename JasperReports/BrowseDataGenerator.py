@@ -234,7 +234,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                 # Check for field 'id' because we can't find it's
                 # type in _fields
                 value = str(value)
-            elif value in (False, None):
+            elif value is None:
                 value = ''
             elif field_type == 'date':
                 value = '%s 00:00:00' % str(value)
