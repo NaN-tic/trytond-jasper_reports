@@ -7,6 +7,8 @@ import time
 import tempfile
 import logging
 from urlparse import urlparse
+from PyPDF2 import PdfFileMerger, PdfFileReader
+from cStringIO import StringIO
 
 from trytond.report import Report
 from trytond.config import config as config_
@@ -128,19 +130,40 @@ class JasperReport(Report):
 
     @classmethod
     def execute(cls, ids, data):
+        '''
+        Execute the report on record ids.
+        The dictionary with data that will be set in local context of the
+        report.
+        It returns a tuple with:
+            report type,
+            data,
+            a boolean to direct print,
+            the report name
+        '''
         pool = Pool()
         ActionReport = pool.get('ir.action.report')
-
-        report_actions = ActionReport.search([
+        action_reports = ActionReport.search([
                 ('report_name', '=', cls.__name__)
                 ])
-        if not report_actions:
-            raise Exception('Error', 'Report (%s) not found!' % cls.__name__)
-        report_action = report_actions[0]
-        report_path = cls.get_report_file(report_action)
-        report = JasperReports.JasperReport(report_path)
-        model = report_action.model
-        output_format = report_action.extension
+        if not action_reports:
+            raise Exception('Error', 'Report (%s) not find!' % cls.__name__)
+        cls.check_access()
+        action_report = action_reports[0]
+        model = action_report.model or data.get('model')
+        type, data, pages = cls.render(action_report, data, model, ids)
+
+        if Transaction().context.get('return_pages'):
+            return (type, buffer(data), action_report.direct_print,
+                action_report.name, pages)
+
+        return (type, buffer(data), action_report.direct_print,
+            action_report.name)
+
+    @classmethod
+    def render(cls, action_report, data, model, ids):
+        logger = logging.getLogger('jasper_reports')
+
+        output_format = action_report.extension
         if 'output_format' in data:
             output_format = data['output_format']
 
@@ -156,6 +179,9 @@ class JasperReport(Report):
         logger.info("Temporary data file: '%s'" % dataFile)
 
         start = time.time()
+
+        report_path = cls.get_report_file(action_report)
+        report = JasperReports.JasperReport(report_path)
 
         # If the language used is xpath create the xmlFile in dataFile.
         if report.language() == 'xpath':
@@ -213,7 +239,7 @@ class JasperReport(Report):
             'subreports': subreportDataFiles,
         }
         sources_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-            '..', os.path.dirname(report_action.report)) + os.sep
+            '..', os.path.dirname(action_report.report)) + os.sep
         parameters = {
             'STANDARD_DIR': report.standardDirectory(),
             'REPORT_LOCALE': locale,
@@ -251,12 +277,7 @@ class JasperReport(Report):
                 except os.error:
                     logger.warning("Could not remove file '%s'." % file)
 
-        if Transaction().context.get('return_pages'):
-            return (output_format, bytearray(file_data),
-                report_action.direct_print, report_action.name, pages)
-
-        return (output_format, bytearray(file_data), report_action.direct_print,
-            report_action.name)
+        return (output_format, file_data, pages)
 
     @classmethod
     def dsn(cls):
@@ -293,3 +314,20 @@ class JasperReport(Report):
     @classmethod
     def addonsPath(cls):
         return os.path.dirname(cls.path())
+
+    @classmethod
+    def merge_pdfs(cls, pdfs_data):
+        merger = PdfFileMerger()
+        for pdf_data in pdfs_data:
+            tmppdf = StringIO(pdf_data)
+            merger.append(PdfFileReader(tmppdf))
+            tmppdf.close()
+
+        tmppdf = StringIO()
+        merger.write(tmppdf)
+        pdf_data = tmppdf.getvalue()
+
+        merger.close()
+        tmppdf.close()
+
+        return pdf_data
