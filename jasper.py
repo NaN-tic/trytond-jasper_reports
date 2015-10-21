@@ -6,10 +6,14 @@ import re
 import time
 import tempfile
 import logging
+try:
+    import cStringIO as StringIO
+except ImportError:
+    import StringIO
 from urlparse import urlparse
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
-from trytond.report import Report, StringIO
+from trytond.report import Report
 from trytond.config import config as config_
 from trytond.pool import Pool
 from trytond.transaction import Transaction
@@ -318,11 +322,11 @@ class JasperReport(Report):
     def merge_pdfs(cls, pdfs_data):
         merger = PdfFileMerger()
         for pdf_data in pdfs_data:
-            tmppdf = StringIO.StringIO(pdf_data)
+            tmppdf = StringIO(pdf_data)
             merger.append(PdfFileReader(tmppdf))
             tmppdf.close()
 
-        tmppdf = StringIO.StringIO()
+        tmppdf = StringIO()
         merger.write(tmppdf)
         pdf_data = tmppdf.getvalue()
 
