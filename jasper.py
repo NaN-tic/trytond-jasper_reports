@@ -153,10 +153,10 @@ class JasperReport(Report):
         type, data, pages = cls.render(action_report, data, model, ids)
 
         if Transaction().context.get('return_pages'):
-            return (type, buffer(data), action_report.direct_print,
+            return (type, bytearray(data), action_report.direct_print,
                 action_report.name, pages)
 
-        return (type, buffer(data), action_report.direct_print,
+        return (type, bytearray(data), action_report.direct_print,
             action_report.name)
 
     @classmethod
