@@ -6,7 +6,6 @@ import re
 import time
 import tempfile
 import logging
-from urlparse import urlparse
 from PyPDF2 import PdfFileMerger, PdfFileReader
 from cStringIO import StringIO
 
@@ -76,14 +75,14 @@ class JasperReport(Report):
                 report_name = report_fname[:-7]  # .jasper
                 ActionReport = Pool().get('ir.action.report')
 
-                report_actions = ActionReport.search([
+                action_reports = ActionReport.search([
                         ('report_name', '=', report_name)
                         ])
-                if not report_actions:
+                if not action_reports:
                     raise Exception('Error', 'SubReport (%s) not found!' %
                         report_name)
-                report_action = report_actions[0]
-                cls.get_report_file(report_action, path)
+                action_report = action_reports[0]
+                cls.get_report_file(action_report, path)
                 report_names.append(report_name)
 
         if not report_content:
@@ -144,16 +143,15 @@ class JasperReport(Report):
                 ])
         if not action_reports:
             raise Exception('Error', 'Report (%s) not found!' % cls.__name__)
-        cls.check_access()
         action_report = action_reports[0]
         model = action_report.model or data.get('model')
-        type, data, pages = cls.render(action_report, data, model, ids)
+        output_format, file_data, pages = cls.render(action_report, data, model, ids)
 
         if Transaction().context.get('return_pages'):
-            return (type, bytearray(data), action_report.direct_print,
-                action_report.name, pages)
+            return (output_format, buffer(file_data),
+                action_report.direct_print, action_report.name, pages)
 
-        return (type, bytearray(data), action_report.direct_print,
+        return (output_format, buffer(file_data), action_report.direct_print,
             action_report.name)
 
     @classmethod
