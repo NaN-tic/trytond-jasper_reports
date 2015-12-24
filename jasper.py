@@ -7,7 +7,7 @@ import time
 import tempfile
 import logging
 from urlparse import urlparse
-from PyPDF2 import PdfFileMerger, PdfFileReader
+import subprocess
 
 from trytond.report import Report, StringIO
 from trytond.config import config
@@ -314,17 +314,26 @@ class JasperReport(Report):
 
     @classmethod
     def merge_pdfs(cls, pdfs_data):
-        merger = PdfFileMerger()
+        path = tempfile.mkdtemp(prefix='trytond-jasper-merger-')
+        count = 0
+        filenames = []
         for pdf_data in pdfs_data:
-            tmppdf = StringIO.StringIO(pdf_data)
-            merger.append(PdfFileReader(tmppdf))
-            tmppdf.close()
+            count += 1
+            filename = os.path.join(path, str(count) + '.pdf')
+            filenames.append(filename)
+            f = open(filename, 'w')
+            try:
+                f.write(str(pdf_data))
+            finally:
+                f.close()
 
-        tmppdf = StringIO.StringIO()
-        merger.write(tmppdf)
-        pdf_data = tmppdf.getvalue()
+        output = os.path.join(path, 'output.pdf')
+        command = ['pdftk'] + filenames + ['cat', 'output', output]
+        process = subprocess.call(command)
 
-        merger.close()
-        tmppdf.close()
-
+        f = open(output, 'r')
+        try:
+            pdf_data = f.read()
+        finally:
+            f.close()
         return pdf_data
