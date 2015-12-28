@@ -6,6 +6,7 @@ import re
 import time
 import tempfile
 import logging
+import subprocess
 from urlparse import urlparse
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
@@ -27,6 +28,9 @@ PID = config.get('jasper', 'pid', 'tryton-jasper.pid')
 
 # Determines if temporary files will be removed
 UNLINK = config.getboolean('jasper', 'unlink', True)
+
+# Determines if on merge, resulting PDF should be compacted using ghostscript
+COMPACT_ON_MERGE = config.getboolean('jasper', 'compact_on_merge', True)
 
 
 class JasperReport(Report):
@@ -320,11 +324,33 @@ class JasperReport(Report):
             merger.append(PdfFileReader(tmppdf))
             tmppdf.close()
 
-        tmppdf = StringIO.StringIO()
-        merger.write(tmppdf)
-        pdf_data = tmppdf.getvalue()
+        if COMPACT_ON_MERGE:
+            # Use ghostscript to compact PDF which will usually remove
+            # duplicated images. It can make a PDF go from 17MB to 1.8MB,
+            # for example.
+            path = tempfile.mkdtemp()
+            merged_path = os.path.join(path, 'merged.pdf')
+            merged = open(merged_path, 'wb')
+            merger.write(merged)
+            merged.close()
 
-        merger.close()
-        tmppdf.close()
+            compacted_path = os.path.join(path, 'compacted.pdf')
+            output = os.path.join(path, 'compacted.pdf')
+            command = ['gs', '-q', '-dBATCH', '-dNOPAUSE', '-dSAFER',
+                '-sDEVICE=pdfwrite', '-dPDFSETTINGS=/printer',
+                '-sOutputFile=%s' % compacted_path, merged_path]
+            process = subprocess.call(command)
+
+            f = open(compacted_path, 'r')
+            try:
+                pdf_data = f.read()
+            finally:
+                f.close()
+        else:
+            tmppdf = StringIO.StringIO()
+            merger.write(tmppdf)
+            pdf_data = tmppdf.getvalue()
+            merger.close()
+            tmppdf.close()
 
         return pdf_data
