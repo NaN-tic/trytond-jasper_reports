@@ -6,40 +6,30 @@ import re
 import time
 import tempfile
 import logging
-import subprocess
-from io import BytesIO
 from urlparse import urlparse
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
-from trytond.report import Report
-from trytond.config import config as config_
+from trytond.report import Report, StringIO
+from trytond.config import config
 from trytond.pool import Pool
 from trytond.transaction import Transaction
 from trytond.cache import Cache
-from trytond.modules import MODULES_PATH
 
-from .JasperReports import JasperReport as JReport, JasperServer
-from .JasperReports import CsvRecordDataGenerator, CsvBrowseDataGenerator
+import JasperReports
 
 # Determines the port where the JasperServer process should listen with its
 # XML-RPC server for incomming calls
-PORT = config_.getint('jasper', 'port', default=8090)
+PORT = config.getint('jasper', 'port', 8090)
 
 # Determines the file name where the process ID of the JasperServer
 # process should be stored
-PID = config_.get('jasper', 'pid', default='tryton-jasper.pid')
+PID = config.get('jasper', 'pid', 'tryton-jasper.pid')
 
 # Determines if temporary files will be removed
-UNLINK = config_.getboolean('jasper', 'unlink', default=True)
-
-# Determines whether report path cache should be used or not
-USE_CACHE = config_.getboolean('jasper', 'use_cache', default=True)
-CACHE_FOLDER = config_.get('jasper', 'cache_folder', default=None)
+UNLINK = config.getboolean('jasper', 'unlink', True)
 
 # Determines if on merge, resulting PDF should be compacted using ghostscript
-COMPACT_ON_MERGE = config_.getboolean('jasper', 'compact_on_merge', default=False)
-
-logger = logging.getLogger(__name__)
+COMPACT_ON_MERGE = config.getboolean('jasper', 'compact_on_merge', True)
 
 
 class JasperReport(Report):
@@ -64,20 +54,14 @@ class JasperReport(Report):
 
     @classmethod
     def get_report_file(cls, report, path=None):
-        if USE_CACHE:
-            cache_path = cls._get_report_file_cache.get(report.id)
-            if cache_path is not None:
-                if (os.path.isfile(cache_path)
-                        and (not path or cache_path.startswith(path))):
-                    return cache_path
+        cache_path = cls._get_report_file_cache.get(report.id)
+        if cache_path is not None:
+            if (os.path.isfile(cache_path)
+                    and (not path or cache_path.startswith(path))):
+                return cache_path
 
         if not path:
-            if CACHE_FOLDER:
-                if not os.path.exists(CACHE_FOLDER):
-                    os.makedirs(CACHE_FOLDER)
-                path = CACHE_FOLDER
-            else:
-                path = tempfile.mkdtemp(prefix='trytond-jasper-')
+            path = tempfile.mkdtemp(prefix='trytond-jasper-')
 
         report_content = str(report.report_content)
         report_names = [report.report_name]
@@ -92,7 +76,7 @@ class JasperReport(Report):
             for subreport in subreports:
                 sreport = subreport.split('"')
                 report_fname = sreport[1]
-                report_name = report_fname.split('.')[0]
+                report_name = report_fname[:-7]  # .jasper
                 ActionReport = Pool().get('ir.action.report')
 
                 report_actions = ActionReport.search([
@@ -169,10 +153,10 @@ class JasperReport(Report):
         type, data, pages = cls.render(action_report, data, model, ids)
 
         if Transaction().context.get('return_pages'):
-            return (type, bytearray(data), action_report.direct_print,
+            return (type, buffer(data), action_report.direct_print,
                 action_report.name, pages)
 
-        return (type, bytearray(data), action_report.direct_print,
+        return (type, buffer(data), action_report.direct_print,
             action_report.name)
 
     @classmethod
@@ -197,14 +181,16 @@ class JasperReport(Report):
         start = time.time()
 
         report_path = cls.get_report_file(action_report)
-        report = JReport(report_path)
+        report = JasperReports.JasperReport(report_path)
 
         # If the language used is xpath create the xmlFile in dataFile.
         if report.language() == 'xpath':
             if data.get('data_source', 'model') == 'records':
-                generator = CsvRecordDataGenerator(report, data['records'])
+                generator = JasperReports.CsvRecordDataGenerator(report,
+                    data['records'])
             else:
-                generator = CsvBrowseDataGenerator(report, model, ids)
+                generator = JasperReports.CsvBrowseDataGenerator(report, model,
+                    ids)
                 temporary_files += generator.temporary_files
 
             generator.generate(dataFile)
@@ -231,13 +217,14 @@ class JasperReport(Report):
                 temporary_files.append(subreportDataFile)
 
                 if subreport.isHeader():
-                    generator = CsvBrowseDataGenerator(subreport,
+                    generator = JasperReports.CsvBrowseDataGenerator(subreport,
                         'res.users', [Transaction().user])
                 elif data.get('data_source', 'model') == 'records':
-                    generator = CsvRecordDataGenerator(subreport,
+                    generator = JasperReports.CsvRecordDataGenerator(subreport,
                         data['records'])
                 else:
-                    generator = CsvBrowseDataGenerator(subreport, model, ids)
+                    generator = JasperReports.CsvBrowseDataGenerator(subreport,
+                        model, ids)
                 generator.generate(subreportDataFile)
 
         # Start: Report execution section
@@ -251,9 +238,8 @@ class JasperReport(Report):
             'password': cls.password(),
             'subreports': subreportDataFiles,
         }
-        sources_dir = os.path.join(
-            MODULES_PATH,
-            os.path.dirname(action_report.report) + os.sep)
+        sources_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+            '..', os.path.dirname(action_report.report)) + os.sep
         parameters = {
             'STANDARD_DIR': report.standardDirectory(),
             'REPORT_LOCALE': locale,
@@ -267,7 +253,7 @@ class JasperReport(Report):
 
         # Call the external java application that will generate the PDF
         # file in outputFile
-        server = JasperServer(PORT)
+        server = JasperReports.JasperServer(PORT)
         server.setPidFile(PID)
         pages = server.execute(connectionParameters, report_path,
             outputFile, parameters)
@@ -295,21 +281,21 @@ class JasperReport(Report):
 
     @classmethod
     def dsn(cls):
-        uri = urlparse(config_.get('database', 'uri'))
+        uri = urlparse(config.get('database', 'uri'))
         scheme = uri.scheme or 'postgresql'
         host = uri.hostname or 'localhost'
         port = uri.port or 5432
-        dbname = Transaction().database.name
+        dbname = Transaction().cursor.dbname
         return 'jdbc:%s://%s:%s/%s' % (scheme, host, str(port), dbname)
 
     @classmethod
     def userName(cls):
-        uri = urlparse(config_.get('database', 'uri'))
+        uri = urlparse(config.get('database', 'uri'))
         return uri.username or cls.systemUserName()
 
     @classmethod
     def password(cls):
-        uri = urlparse(config_.get('database', 'uri'))
+        uri = urlparse(config.get('database', 'uri'))
         return uri.password or ''
 
     @classmethod
@@ -333,7 +319,7 @@ class JasperReport(Report):
     def merge_pdfs(cls, pdfs_data):
         merger = PdfFileMerger()
         for pdf_data in pdfs_data:
-            tmppdf = BytesIO(pdf_data)
+            tmppdf = StringIO.StringIO(pdf_data)
             merger.append(PdfFileReader(tmppdf))
             tmppdf.close()
 
@@ -348,11 +334,11 @@ class JasperReport(Report):
             merged.close()
 
             compacted_path = os.path.join(path, 'compacted.pdf')
-            # changed PDFSETTINGS from /printer to /prepress
+            output = os.path.join(path, 'compacted.pdf')
             command = ['gs', '-q', '-dBATCH', '-dNOPAUSE', '-dSAFER',
-                '-sDEVICE=pdfwrite', '-dPDFSETTINGS=/prepress',
+                '-sDEVICE=pdfwrite', '-dPDFSETTINGS=/printer',
                 '-sOutputFile=%s' % compacted_path, merged_path]
-            subprocess.call(command)
+            process = subprocess.call(command)
 
             f = open(compacted_path, 'r')
             try:
@@ -360,7 +346,7 @@ class JasperReport(Report):
             finally:
                 f.close()
         else:
-            tmppdf = BytesIO()
+            tmppdf = StringIO.StringIO()
             merger.write(tmppdf)
             pdf_data = tmppdf.getvalue()
             merger.close()
