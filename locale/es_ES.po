@@ -26,10 +26,6 @@ msgctxt "field:jasper_reports.data_template.start,model:"
 msgid "Model"
 msgstr "Modelo"
 
-msgctxt "model:ir.action,name:"
-msgid "Jasper Report"
-msgstr "Jasper Report"
-
 msgctxt "model:ir.action,name:act_jasper_reports_data_template"
 msgid "Create Data Template"
 msgstr "Crear plantilla de datos"
