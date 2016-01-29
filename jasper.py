@@ -33,6 +33,9 @@ PID = config_.get('jasper', 'pid', default='tryton-jasper.pid')
 # Determines if temporary files will be removed
 UNLINK = config_.getboolean('jasper', 'unlink', default=True)
 
+# Determines whether report path cache should be used or not
+USE_CACHE = config_.getboolean('jasper', 'use_cache', default=True)
+
 # Determines if on merge, resulting PDF should be compacted using ghostscript
 COMPACT_ON_MERGE = config_.getboolean('jasper', 'compact_on_merge', default=False)
 
@@ -61,11 +64,12 @@ class JasperReport(Report):
 
     @classmethod
     def get_report_file(cls, report, path=None):
-        cache_path = cls._get_report_file_cache.get(report.id)
-        if cache_path is not None:
-            if (os.path.isfile(cache_path)
-                    and (not path or cache_path.startswith(path))):
-                return cache_path
+        if USE_CACHE:
+            cache_path = cls._get_report_file_cache.get(report.id)
+            if cache_path is not None:
+                if (os.path.isfile(cache_path)
+                        and (not path or cache_path.startswith(path))):
+                    return cache_path
 
         if not path:
             path = tempfile.mkdtemp(prefix='trytond-jasper-')
