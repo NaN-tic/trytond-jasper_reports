@@ -29,7 +29,7 @@ CONFIG['jasperpid'] = CONFIG.get('jasperpid', 'tryton-jasper.pid')
 CONFIG['jasperunlink'] = CONFIG.get('jasperunlink', True)
 
 # Determines whether report path cache should be used or not
-USE_CACHE = config.getboolean('jasper', 'use_cache', True)
+CONFIG['jaspercache'] = CONFIG.get('jaspercache', True)
 
 class JasperReport(Report):
     _get_report_file_cache = Cache('jasper_report.report_file')
@@ -53,7 +53,7 @@ class JasperReport(Report):
 
     @classmethod
     def get_report_file(cls, report, path=None):
-        if USE_CACHE:
+        if CONFIG['jasper_cache']:
             cache_path = cls._get_report_file_cache.get(report.id)
             if cache_path is not None:
                 if (os.path.isfile(cache_path)
