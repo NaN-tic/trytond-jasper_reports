@@ -32,6 +32,8 @@ UNLINK = config.getboolean('jasper', 'unlink', True)
 # Determines if on merge, resulting PDF should be compacted using ghostscript
 COMPACT_ON_MERGE = config.getboolean('jasper', 'compact_on_merge', True)
 
+# Determines whether report path cache should be used or not
+USE_CACHE = config.getboolean('jasper', 'use_cache', True)
 
 class JasperReport(Report):
     _get_report_file_cache = Cache('jasper_report.report_file')
@@ -55,11 +57,12 @@ class JasperReport(Report):
 
     @classmethod
     def get_report_file(cls, report, path=None):
-        cache_path = cls._get_report_file_cache.get(report.id)
-        if cache_path is not None:
-            if (os.path.isfile(cache_path)
-                    and (not path or cache_path.startswith(path))):
-                return cache_path
+        if USE_CACHE:
+            cache_path = cls._get_report_file_cache.get(report.id)
+            if cache_path is not None:
+                if (os.path.isfile(cache_path)
+                        and (not path or cache_path.startswith(path))):
+                    return cache_path
 
         if not path:
             path = tempfile.mkdtemp(prefix='trytond-jasper-')
