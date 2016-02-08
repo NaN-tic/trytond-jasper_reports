@@ -87,7 +87,7 @@ class JasperReport(Report):
             for subreport in subreports:
                 sreport = subreport.split('"')
                 report_fname = sreport[1]
-                report_name = report_fname[:-7]  # .jasper
+                report_name = report_fname.split('.')[0]
                 ActionReport = Pool().get('ir.action.report')
 
                 report_actions = ActionReport.search([
