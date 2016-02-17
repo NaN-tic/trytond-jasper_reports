@@ -253,6 +253,8 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                     self.temporary_files.append(fileName)
                     self.imageFiles[imageId] = fileName
                 value = fileName
+            elif field_type == 'timedelta':
+                value = value.total_seconds()
             elif isinstance(value, unicode):
                 value = value.encode('utf-8')
             elif isinstance(value, float):
