@@ -338,11 +338,11 @@ class JasperReport(Report):
             merged.close()
 
             compacted_path = os.path.join(path, 'compacted.pdf')
-            output = os.path.join(path, 'compacted.pdf')
+            # changed PDFSETTINGS from /printer to /prepress
             command = ['gs', '-q', '-dBATCH', '-dNOPAUSE', '-dSAFER',
-                '-sDEVICE=pdfwrite', '-dPDFSETTINGS=/printer',
+                '-sDEVICE=pdfwrite', '-dPDFSETTINGS=/prepress',
                 '-sOutputFile=%s' % compacted_path, merged_path]
-            process = subprocess.call(command)
+            subprocess.call(command)
 
             f = open(compacted_path, 'r')
             try:
