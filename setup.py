@@ -42,7 +42,7 @@ minor_version = int(minor_version)
 name = 'trytonspain_jasper_reports'
 download_url = 'https://bitbucket.org/trytonspain/trytond-jasper_reports'
 
-requires = []
+requires = ['PyPDF2']
 for dep in info.get('depends', []):
     if not re.match(r'(ir|res)(\W|$)', dep):
         prefix = MODULE2PREFIX.get(dep, 'trytond')
