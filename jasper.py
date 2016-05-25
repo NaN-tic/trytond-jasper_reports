@@ -19,7 +19,8 @@ from trytond.pool import Pool
 from trytond.transaction import Transaction
 from trytond.cache import Cache
 
-import JasperReports
+from .JasperReports import JasperReport as JReport, JasperServer
+from .JasperReports import CsvRecordDataGenerator, CsvBrowseDataGenerator
 
 # Determines the port where the JasperServer process should listen with its
 # XML-RPC server for incomming calls
@@ -184,16 +185,14 @@ class JasperReport(Report):
         start = time.time()
 
         report_path = cls.get_report_file(action_report)
-        report = JasperReports.JasperReport(report_path)
+        report = JReport(report_path)
 
         # If the language used is xpath create the xmlFile in dataFile.
         if report.language() == 'xpath':
             if data.get('data_source', 'model') == 'records':
-                generator = JasperReports.CsvRecordDataGenerator(report,
-                    data['records'])
+                generator = CsvRecordDataGenerator(report, data['records'])
             else:
-                generator = JasperReports.CsvBrowseDataGenerator(report, model,
-                    ids)
+                generator = CsvBrowseDataGenerator(report, model, ids)
                 temporary_files += generator.temporary_files
 
             generator.generate(dataFile)
@@ -220,14 +219,13 @@ class JasperReport(Report):
                 temporary_files.append(subreportDataFile)
 
                 if subreport.isHeader():
-                    generator = JasperReports.CsvBrowseDataGenerator(subreport,
+                    generator = CsvBrowseDataGenerator(subreport,
                         'res.users', [Transaction().user])
                 elif data.get('data_source', 'model') == 'records':
-                    generator = JasperReports.CsvRecordDataGenerator(subreport,
+                    generator = CsvRecordDataGenerator(subreport,
                         data['records'])
                 else:
-                    generator = JasperReports.CsvBrowseDataGenerator(subreport,
-                        model, ids)
+                    generator = CsvBrowseDataGenerator(subreport, model, ids)
                 generator.generate(subreportDataFile)
 
         # Start: Report execution section
@@ -256,7 +254,7 @@ class JasperReport(Report):
 
         # Call the external java application that will generate the PDF
         # file in outputFile
-        server = JasperReports.JasperServer(PORT)
+        server = JasperServer(PORT)
         server.setPidFile(PID)
         pages = server.execute(connectionParameters, report_path,
             outputFile, parameters)
