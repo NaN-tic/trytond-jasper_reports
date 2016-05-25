@@ -20,6 +20,7 @@ def read(fname):
         os.path.join(os.path.dirname(__file__), fname),
         'r', encoding='utf-8').read()
 
+
 def get_require_version(name):
     if minor_version % 2:
         require = '%s >= %s.%s.dev0, < %s.%s'
@@ -55,6 +56,11 @@ if minor_version % 2:
     # Add development index for testing with proteus
     dependency_links.append('https://trydevpi.tryton.org/')
 
+java_files = []
+for (path, directories, filenames) in os.walk('java'):
+    for filename in filenames:
+        java_files.append(os.path.join(path, filename))
+
 setup(name=name,
     version=version,
     description='Tryton Jasper Reports Module',
@@ -67,12 +73,13 @@ setup(name=name,
     package_dir={'trytond.modules.jasper_reports': '.'},
     packages=[
         'trytond.modules.jasper_reports',
+        'trytond.modules.jasper_reports.JasperReports',
         'trytond.modules.jasper_reports.tests',
         ],
     package_data={
         'trytond.modules.jasper_reports': (info.get('xml', [])
             + ['tryton.cfg', 'view/*.xml', 'locale/*.po', '*.odt',
-                'icons/*.svg', 'tests/*.rst']),
+                'icons/*.svg', 'tests/*.rst'] + java_files),
         },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
