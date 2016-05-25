@@ -39,6 +39,11 @@ requires.append('trytond >= %s.%s, < %s.%s' %
 tests_require = ['proteus >= %s.%s, < %s.%s' %
     (major_version, minor_version, major_version, minor_version + 1)]
 
+java_files = []
+for (path, directories, filenames) in os.walk('java'):
+    for filename in filenames:
+        java_files.append(os.path.join(path, filename))
+
 setup(name='%s_%s' % (PREFIX, MODULE),
     version=info.get('version', '0.0.1'),
     description='Tryton module for using Jasper Reports as report engine.',
@@ -49,12 +54,13 @@ setup(name='%s_%s' % (PREFIX, MODULE),
     package_dir={'trytond.modules.%s' % MODULE: '.'},
     packages=[
         'trytond.modules.%s' % MODULE,
+        'trytond.modules.jasper_reports.JasperReports',
         'trytond.modules.%s.tests' % MODULE,
         ],
     package_data={
         'trytond.modules.%s' % MODULE: (info.get('xml', [])
             + ['tryton.cfg', 'view/*.xml', 'locale/*.po', 'tests/*.rst',
-            'JasperReports/*']),
+            'JasperReports/*'] + java_files),
         },
     classifiers=[
         'Development Status :: 5 - Production/Stable',

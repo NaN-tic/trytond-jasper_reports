@@ -10,3 +10,4 @@ include locale/*.po
 include doc/*
 include tests/*
 include JasperReports/*
+include java/*
