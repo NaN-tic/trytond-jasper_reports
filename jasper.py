@@ -12,7 +12,7 @@ try:
 except ImportError:
     import StringIO
 from urlparse import urlparse
-from PyPDF2 import PdfFileMerger, PdfFileReader
+from PyPDF2 import PdfFileMerger, PdfFileReader, PdfFileWriter
 
 from trytond.report import Report
 from trytond.config import config as config_
