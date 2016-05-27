@@ -8,7 +8,7 @@ import tempfile
 import logging
 import subprocess
 from urlparse import urlparse
-from PyPDF2 import PdfFileMerger, PdfFileReader
+from PyPDF2 import PdfFileMerger, PdfFileReader, PdfFileWriter
 
 from trytond.report import Report, StringIO
 from trytond.config import config
