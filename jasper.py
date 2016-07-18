@@ -16,6 +16,7 @@ from trytond.config import config as config_
 from trytond.pool import Pool
 from trytond.transaction import Transaction
 from trytond.cache import Cache
+from trytond.modules import MODULES_PATH
 
 from .JasperReports import JasperReport as JReport, JasperServer
 from .JasperReports import CsvRecordDataGenerator, CsvBrowseDataGenerator
@@ -244,8 +245,9 @@ class JasperReport(Report):
             'password': cls.password(),
             'subreports': subreportDataFiles,
         }
-        sources_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-            '..', os.path.dirname(action_report.report)) + os.sep
+        sources_dir = os.path.join(
+            MODULES_PATH,
+            os.path.dirname(action_report.report) + os.sep)
         parameters = {
             'STANDARD_DIR': report.standardDirectory(),
             'REPORT_LOCALE': locale,
