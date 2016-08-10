@@ -62,11 +62,9 @@ class BrowseDataGenerator(AbstractDataGenerator):
             elif root == 'User':
                 value = pool.get('res.user').browse([Transaction().user])
             else:
-                if root == 'id':
-                    value = record.id
-                elif hasattr(record, root):
+                try:
                     value = getattr(record, root)
-                else:
+                except AttributeError:
                     self.warning("Field '%s' does not exist in model '%s'." %
                             (root, record.__name__))
                     continue
@@ -178,13 +176,10 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
             elif root == 'User':
                 value = User(Transaction().user)
             else:
-                if root == 'id':
-                    value = record.id
-                    field_type = record._fields[field]._type
-                elif hasattr(record, root):
+                try:
                     value = getattr(record, root)
                     field_type = record._fields[field]._type
-                else:
+                except AttributeError:
                     value = None
                     field_type = None
                     self.warning("Field '%s' (path: %s) does not exist in "
