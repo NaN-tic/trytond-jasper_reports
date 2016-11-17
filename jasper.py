@@ -1,13 +1,16 @@
 #This file is part jasper_reports module for Tryton.
 #The COPYRIGHT file at the top level of this repository contains
 #the full copyright notices and license terms.
+try:
+    import cStringIO as StringIO
+except ImportError:
+    from io import StringIO
 import os
 import re
 import time
 import tempfile
 import logging
 import subprocess
-from io import BytesIO
 from urlparse import urlparse
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
