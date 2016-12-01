@@ -27,9 +27,8 @@ download_url = 'https://bitbucket.org/trytonspain/trytond-jasper_reports'
 
 
 def download_java_files(target_dir):
-    # Dont download files when building the tarball
     if target_dir[:7] == '/build/':
-        return
+        raise NotImplementedError('Wheel building is not impelmented')
     java_dir = os.path.join(target_dir, 'java')
     print('installing java files')
     if os.path.exists(java_dir):
