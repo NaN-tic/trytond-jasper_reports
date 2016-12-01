@@ -1,3 +1,6 @@
+Version 4.2.0 - 2016-12-01
+* Bug fixes (see mercurial logs for details)
+
 Version 4.0.0 - 2016-05-03
 * Invalidate subreport file cache if it is generated for another main report
 * Add support for subreports using same datasource
