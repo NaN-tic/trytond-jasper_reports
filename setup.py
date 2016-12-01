@@ -4,15 +4,49 @@
 # the full copyright notices and license terms.
 
 from setuptools import setup
+from setuptools.command.install import install
 import re
 import os
 import io
+import shutil
+import urllib2
+import tempfile
+from zipfile import ZipFile
 try:
     from configparser import ConfigParser
 except ImportError:
     from ConfigParser import ConfigParser
 
 MODULE2PREFIX = {}
+
+download_url = 'https://bitbucket.org/trytonspain/trytond-jasper_reports'
+
+
+def download_java_files(target_dir):
+    java_dir = os.path.join(target_dir, 'java')
+    print 'installing java files', java_dir
+    if os.path.exists(java_dir):
+        return
+    print 'downloading java files'
+    url = download_url + '/get/default.zip'
+    zipfile = ZipFile(io.BytesIO(urllib2.urlopen(url).read()))
+    tempdir = tempfile.mkdtemp()
+    print 'copy java files'
+    zipfile.extractall(tempdir)
+    zipdir = os.path.join(tempdir, os.listdir(tempdir)[0])
+    shutil.copytree(os.path.join(zipdir, 'java'), java_dir)
+    print 'cleaning temporal files'
+    shutil.rmtree(tempdir)
+
+
+class JasperInstall(install):
+    'Install package and download java files'
+
+    def run(self):
+        install.run(self)
+        target_dir = os.sep + os.path.join(*self.get_outputs()[0].split(
+                os.sep)[:-1])
+        download_java_files(target_dir)
 
 
 def read(fname):
@@ -41,7 +75,6 @@ major_version, minor_version, _ = version.split('.', 2)
 major_version = int(major_version)
 minor_version = int(minor_version)
 name = 'trytonspain_jasper_reports'
-download_url = 'https://bitbucket.org/trytonspain/trytond-jasper_reports'
 
 requires = ['PyPDF2']
 for dep in info.get('depends', []):
@@ -56,11 +89,6 @@ if minor_version % 2:
     # Add development index for testing with proteus
     dependency_links.append('https://trydevpi.tryton.org/')
 
-java_files = []
-for (path, directories, filenames) in os.walk('java'):
-    for filename in filenames:
-        java_files.append(os.path.join(path, filename))
-
 setup(name=name,
     version=version,
     description='Tryton Jasper Reports Module',
@@ -70,6 +98,11 @@ setup(name=name,
     url='https://bitbucket.org/trytonspain/',
     download_url=download_url,
     keywords='',
+    # Required in order to download java files as they are not uploaded to
+    # PyPI because there is a limit of 60MB
+    cmdclass={
+        'install': JasperInstall,
+        },
     package_dir={'trytond.modules.jasper_reports': '.'},
     packages=[
         'trytond.modules.jasper_reports',
@@ -79,7 +112,7 @@ setup(name=name,
     package_data={
         'trytond.modules.jasper_reports': (info.get('xml', [])
             + ['tryton.cfg', 'view/*.xml', 'locale/*.po', '*.odt',
-                'icons/*.svg', 'tests/*.rst'] + java_files),
+                'icons/*.svg', 'tests/*.rst']),
         },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
