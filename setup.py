@@ -2,6 +2,7 @@
 # This file is part jasper_reports module for Tryton.
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
+from __future__ import print_function
 
 from setuptools import setup
 from setuptools.command.install import install
@@ -9,7 +10,10 @@ import re
 import os
 import io
 import shutil
-import urllib2
+try:
+    import urllib2
+except ImportError:
+    import urllib as urllib2
 import tempfile
 from zipfile import ZipFile
 try:
@@ -23,19 +27,22 @@ download_url = 'https://bitbucket.org/trytonspain/trytond-jasper_reports'
 
 
 def download_java_files(target_dir):
+    # Dont download files when building the tarball
+    if target_dir[:7] == '/build/':
+        return
     java_dir = os.path.join(target_dir, 'java')
-    print 'installing java files', java_dir
+    print('installing java files')
     if os.path.exists(java_dir):
         return
-    print 'downloading java files'
+    print('downloading java files')
     url = download_url + '/get/default.zip'
     zipfile = ZipFile(io.BytesIO(urllib2.urlopen(url).read()))
     tempdir = tempfile.mkdtemp()
-    print 'copy java files'
+    print('copy java files')
     zipfile.extractall(tempdir)
     zipdir = os.path.join(tempdir, os.listdir(tempdir)[0])
     shutil.copytree(os.path.join(zipdir, 'java'), java_dir)
-    print 'cleaning temporal files'
+    print('cleaning temporal files')
     shutil.rmtree(tempdir)
 
 
