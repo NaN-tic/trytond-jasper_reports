@@ -11,9 +11,9 @@ import os
 import io
 import shutil
 try:
-    import urllib2
+    from urllib2 import urlopen
 except ImportError:
-    import urllib as urllib2
+    from urllib.request import urlopen
 import tempfile
 from zipfile import ZipFile
 try:
@@ -35,7 +35,7 @@ def download_java_files(target_dir):
         return
     print('downloading java files')
     url = download_url + '/get/default.zip'
-    zipfile = ZipFile(io.BytesIO(urllib2.urlopen(url).read()))
+    zipfile = ZipFile(io.BytesIO(urlopen(url).read()))
     tempdir = tempfile.mkdtemp()
     print('copy java files')
     zipfile.extractall(tempdir)
