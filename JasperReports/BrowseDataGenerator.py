@@ -39,7 +39,7 @@ class BrowseDataGenerator(AbstractDataGenerator):
     def valueInAllLanguages(self, model, id, field):
         values = {}
         for language in self.languages():
-            with Transaction().set_context(language=(language or 'en_US')):
+            with Transaction().set_context(language=(language or 'en')):
                 values[language] = model.read([id], [field])[0][field] or ''
         result = []
         for key, value in values.iteritems():
