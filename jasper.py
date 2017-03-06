@@ -7,9 +7,9 @@ import time
 import tempfile
 import logging
 from urlparse import urlparse
-from PyPDF2 import PdfFileMerger, PdfFileReader, PdfFileWriter
 
-from trytond.report import Report, StringIO
+from io import BytesIO
+from trytond.report import Report
 from trytond.config import config
 from trytond.pool import Pool
 from trytond.transaction import Transaction
@@ -19,20 +19,21 @@ import JasperReports
 
 # Determines the port where the JasperServer process should listen with its
 # XML-RPC server for incomming calls
-PORT = config.getint('jasper', 'port', 8090)
+PORT = config.getint('jasper', 'port', default=8090)
 
 # Determines the file name where the process ID of the JasperServer
 # process should be stored
-PID = config.get('jasper', 'pid', 'tryton-jasper.pid')
+
+PID = config.get('jasper', 'pid', default='tryton-jasper.pid')
 
 # Determines if temporary files will be removed
-UNLINK = config.getboolean('jasper', 'unlink', True)
+UNLINK = config.getboolean('jasper', 'unlink', default=True)
 
 # Determines if on merge, resulting PDF should be compacted using ghostscript
-COMPACT_ON_MERGE = config.getboolean('jasper', 'compact_on_merge', True)
+COMPACT_ON_MERGE = config.getboolean('jasper', 'compact_on_merge', default=True)
 
 # Determines whether report path cache should be used or not
-USE_CACHE = config.getboolean('jasper', 'use_cache', True)
+USE_CACHE = config.getboolean('jasper', 'use_cache', default=True)
 
 class JasperReport(Report):
     _get_report_file_cache = Cache('jasper_report.report_file')
@@ -321,8 +322,9 @@ class JasperReport(Report):
     @classmethod
     def merge_pdfs(cls, pdfs_data):
         merger = PdfFileMerger()
+
         for pdf_data in pdfs_data:
-            tmppdf = StringIO.StringIO(pdf_data)
+            tmppdf = BytesIO(pdf_data)
             merger.append(PdfFileReader(tmppdf))
             tmppdf.close()
 
@@ -349,7 +351,7 @@ class JasperReport(Report):
             finally:
                 f.close()
         else:
-            tmppdf = StringIO.StringIO()
+            tmppdf = BytesIO()
             merger.write(tmppdf)
             pdf_data = tmppdf.getvalue()
             merger.close()
