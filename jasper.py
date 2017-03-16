@@ -289,7 +289,7 @@ class JasperReport(Report):
         scheme = uri.scheme or 'postgresql'
         host = uri.hostname or 'localhost'
         port = uri.port or 5432
-        dbname = Transaction().cursor.dbname
+        dbname = Transaction().database.name
         return 'jdbc:%s://%s:%s/%s' % (scheme, host, str(port), dbname)
 
     @classmethod
