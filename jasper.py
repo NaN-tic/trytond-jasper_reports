@@ -6,8 +6,9 @@ import re
 import time
 import tempfile
 import logging
+import subprocess
 from urlparse import urlparse
-
+from PyPDF2 import PdfFileMerger, PdfFileReader
 from io import BytesIO
 from trytond.report import Report
 from trytond.config import config
