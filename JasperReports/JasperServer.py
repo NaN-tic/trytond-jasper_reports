@@ -71,7 +71,7 @@ class JasperServer(trytond.error.WarningErrorMixin):
             'com.nantic.jasperreports.JasperServer',
             unicode(self.port),
             ]
-        process = subprocess.Popen(command, env=env, cwd=cwd)
+        process = subprocess.Popen(command, env=env, cwd=cwd, close_fds=True)
         if self.pidfile:
             f = open(self.pidfile, 'w')
             try:
