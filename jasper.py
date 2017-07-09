@@ -132,6 +132,7 @@ class JasperReport(Report):
                     pfile = os.path.join(path, '%s_%s.properties' % (
                             basename, lang.lower()))
                     cls.write_properties(pfile, p)
+                    p = {}
                 lang = translation.lang
             if translation.src is None or translation.value is None:
                 continue
