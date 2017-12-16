@@ -4,6 +4,7 @@
 
 from trytond.pool import Pool
 from .data_template import *
+from .action import *
 from .model import *
 from .translation import *
 
@@ -12,6 +13,7 @@ def register():
     Pool.register(
         DataTemplateStart,
         DataTemplateResult,
+        ActionReport,
         Model,
         Translation,
         module='jasper_reports', type_='model')
@@ -21,4 +23,3 @@ def register():
         TranslationUpdate,
         TranslationClean,
         module='jasper_reports', type_='wizard')
-
