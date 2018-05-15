@@ -11,7 +11,7 @@ from io import BytesIO
 from urlparse import urlparse
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
-from trytond.report import Report
+from trytond.report import Report, TranslateFactory
 from trytond.config import config as config_
 from trytond.pool import Pool
 from trytond.transaction import Transaction
@@ -64,6 +64,10 @@ class JasperReport(Report):
 
     @classmethod
     def get_report_file(cls, report, path=None):
+        pool = Pool()
+        Lang = pool.get('ir.lang')
+        Translation = pool.get('ir.translation')
+
         if USE_CACHE:
             cache_path = cls._get_report_file_cache.get(report.id)
             if cache_path is not None:
@@ -117,30 +121,14 @@ class JasperReport(Report):
         finally:
             f.close()
 
-        Translation = Pool().get('ir.translation')
-        translations = Translation.search([
-                ('type', '=', 'jasper'),
-                ('name', 'in', report_names),
-                ], order=[
-                ('lang', 'ASC'),
-                ])
-        lang = None
-        p = {}
-        for translation in translations:
-            if lang != translation.lang:
-                if lang:
-                    pfile = os.path.join(path, '%s_%s.properties' % (
-                            basename, lang.lower()))
-                    cls.write_properties(pfile, p)
-                    p = {}
-                lang = translation.lang
-            if translation.src is None or translation.value is None:
-                continue
-            p[translation.src] = translation.value
-        if lang:
+        translate = TranslateFactory(cls.__name__, '', Translation)
+        for lang in Lang.search([('translatable', '=', True)]):
+            translate.set_language(lang.code)
+            translate(text=None)
             pfile = os.path.join(path, '%s_%s.properties' % (
-                    basename, lang.lower()))
-            cls.write_properties(pfile, p)
+                    basename, lang.code.lower()))
+            cls.write_properties(pfile, translate.cache[lang.code])
+
         cls._get_report_file_cache.set(report.id, jrxml_path)
         return jrxml_path
 

@@ -14,11 +14,9 @@ def register():
         data_template.DataTemplateResult,
         action.ActionReport,
         model.Model,
-        translation.Translation,
         module='jasper_reports', type_='model')
     Pool.register(
         data_template.DataTemplate,
         translation.ReportTranslationSet,
-        translation.TranslationUpdate,
         translation.TranslationClean,
         module='jasper_reports', type_='wizard')
