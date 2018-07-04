@@ -46,18 +46,19 @@ class JasperServer(trytond.error.WarningErrorMixin):
         libs = os.path.join(self.path(), '..', 'java', 'lib', '*.jar')
 
         fonts_classpath = config.get('jasper', 'fonts_path', default='')
+        f_cp = ""
         for font_path in fonts_classpath.split(','):
             font_path = font_path.strip()
             if font_path.endswith('.jar'):
-                fonts_classpath += font_path + sep
+                f_cp += font_path + sep
             else:
                 font_path = os.path.join(font_path, '*.jar')
-                fonts_classpath += sep.join(glob.glob(font_path))
-                if fonts_classpath and not fonts_classpath.endswith(':'):
-                    fonts_classpath += ':'
+                f_cp += sep.join(glob.glob(font_path))
+                if f_cp and not f_cp.endswith(':'):
+                    f_cp += ':'
 
         env['CLASSPATH'] = (os.path.join(self.path(), '..', 'java' + sep) +
-            sep.join(glob.glob(libs)) + sep + fonts_classpath +
+            sep.join(glob.glob(libs)) + sep + f_cp +
             os.path.join(self.path(), '..', 'custom_reports'))
         cwd = os.path.join(self.path(), '..', 'java')
 
