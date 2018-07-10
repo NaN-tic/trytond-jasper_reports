@@ -48,19 +48,16 @@ class JasperReport(Report):
 
     @classmethod
     def write_properties(cls, filename, properties):
-        text = u''
-        for key, value in properties.iteritems():
-            if not value:
-                value = key
-            key = key.replace(':', '\\:').replace(' ', '\\ ')
-            value = value.replace(':', '\\:').replace(' ', '\\ ')
-            text += u'%s=%s\n' % (key, value)
-        import codecs
-        f = codecs.open(filename, 'w', 'latin1')
-        try:
-            f.write(text)
-        finally:
-            f.close()
+        def display_unicode(data):
+            return "".join(["\\u%s" % hex(ord(l))[2:].zfill(4) for l in data])
+
+        with open(filename, 'w') as f:
+            for key, value in properties.iteritems():
+                if not value:
+                    value = key
+                key = display_unicode(key)
+                value = display_unicode(value)
+                f.write(u'%s=%s\n' % (key, value))
 
     @classmethod
     def get_report_file(cls, report, path=None):
