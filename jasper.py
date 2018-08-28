@@ -276,7 +276,7 @@ class JasperReport(Report):
                 except os.error:
                     logger.warning("Could not remove file '%s'." % file)
 
-        return (output_format, file_data, pages)
+        return (output_format, bytearray(file_data), pages)
 
     @classmethod
     def dsn(cls):
