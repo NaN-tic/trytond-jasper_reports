@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!-- This file is part of jasper_reports module for Tryton.
+The COPYRIGHT file at the top level of this repository contains the full copyright notices and license terms. -->
+<tryton>
+    <data>
+        <menuitem parent="ir.menu_administration" name="Jasper Reports" id="menu_jasper_reports"/>
+
+        <record model="ir.ui.view" id="data_template_start_view_form">
+            <field name="model">jasper_reports.data_template.start</field>
+            <field name="type">form</field>
+            <field name="name">data_template_start</field>
+        </record>
+
+        <record model="ir.ui.view" id="data_template_result_view_form">
+            <field name="model">jasper_reports.data_template.result</field>
+            <field name="type">form</field>
+            <field name="name">data_template_result</field>
+        </record>
+
+        <record model="ir.action.wizard" id="act_jasper_reports_data_template">
+            <field name="name">Create Data Template</field>
+            <field name="wiz_name">jasper_reports.data_template</field>
+        </record>
+        <menuitem parent="menu_jasper_reports" action="act_jasper_reports_data_template" id="menu_jasper_reports_data_template"/>
+    </data>
+</tryton>

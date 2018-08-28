@@ -1,0 +1,2 @@
+- Integrate translation system to tryton
+- Allow iReport to access tryton directly for browsing model structure

@@ -1,0 +1,12 @@
+include INSTALL
+include README
+include COPYRIGHT
+include CHANGELOG
+include LICENSE
+include *.xml
+include view/*.xml
+include locale/*.po
+include doc/*
+include tests/*
+include JasperReports/*
+include java/*

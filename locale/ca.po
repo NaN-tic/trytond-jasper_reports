@@ -1,0 +1,103 @@
+# 
+msgid ""
+msgstr "Content-Type: text/plain; charset=utf-8\n"
+
+msgctxt "field:jasper_reports.data_template.result,depth:"
+msgid "Depth"
+msgstr "Profunditat"
+
+msgctxt "field:jasper_reports.data_template.result,file:"
+msgid "File"
+msgstr "Fitxer"
+
+msgctxt "field:jasper_reports.data_template.result,id:"
+msgid "ID"
+msgstr "ID"
+
+msgctxt "field:jasper_reports.data_template.start,depth:"
+msgid "Depth"
+msgstr "Profunditat"
+
+msgctxt "field:jasper_reports.data_template.start,id:"
+msgid "ID"
+msgstr "ID"
+
+msgctxt "field:jasper_reports.data_template.start,model:"
+msgid "Model"
+msgstr "Model"
+
+msgctxt "model:ir.action,name:act_jasper_reports_data_template"
+msgid "Create Data Template"
+msgstr "Crea dades plantilla"
+
+msgctxt "model:ir.ui.menu,name:menu_jasper_reports"
+msgid "Jasper Reports"
+msgstr "Jasper Reports"
+
+msgctxt "model:ir.ui.menu,name:menu_jasper_reports_data_template"
+msgid "Create Data Template"
+msgstr "Crea dades plantilla"
+
+msgctxt "model:jasper_reports.data_template.result,name:"
+msgid "Data Template Result"
+msgstr "Resultat dades plantilla"
+
+msgctxt "model:jasper_reports.data_template.start,name:"
+msgid "Create Data Template Start"
+msgstr "Inici creació dades plantilla"
+
+msgctxt "selection:ir.translation,type:"
+msgid "Jasper Report"
+msgstr "Jasper Report"
+
+msgctxt "view:jasper_reports.data_template.result:"
+msgid "Export Data Template"
+msgstr "Exporta dades plantilla"
+
+msgctxt "view:jasper_reports.data_template.start:"
+msgid "Select Model"
+msgstr "Selecciona un model"
+
+msgctxt "wizard_button:ir.translation.clean,start,clean:"
+msgid "Clean"
+msgstr "Neteja"
+
+msgctxt "wizard_button:ir.translation.clean,start,end:"
+msgid "Cancel"
+msgstr "Cancel·la"
+
+msgctxt "wizard_button:ir.translation.clean,succeed,end:"
+msgid "Ok"
+msgstr "Accepta"
+
+msgctxt "wizard_button:ir.translation.set_report,start,end:"
+msgid "Cancel"
+msgstr "Cancel·la"
+
+msgctxt "wizard_button:ir.translation.set_report,start,set_report:"
+msgid "Start Update"
+msgstr "Inicia actualització"
+
+msgctxt "wizard_button:ir.translation.set_report,succeed,end:"
+msgid "Ok"
+msgstr "Accepta"
+
+msgctxt "wizard_button:ir.translation.update,start,end:"
+msgid "Cancel"
+msgstr "Cancel·la"
+
+msgctxt "wizard_button:ir.translation.update,start,update:"
+msgid "Update"
+msgstr "Actualitza"
+
+msgctxt "wizard_button:jasper_reports.data_template,result,end:"
+msgid "Close"
+msgstr "Tanca"
+
+msgctxt "wizard_button:jasper_reports.data_template,start,end:"
+msgid "Cancel"
+msgstr "Cancel·la"
+
+msgctxt "wizard_button:jasper_reports.data_template,start,export:"
+msgid "Export"
+msgstr "Exporta"
