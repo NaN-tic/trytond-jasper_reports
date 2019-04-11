@@ -75,6 +75,11 @@ setup(name='%s_%s' % (PREFIX, MODULE),
         'trytond.modules.%s' % MODULE: (info.get('xml', [])
             + ['tryton.cfg', 'view/*.xml', 'locale/*.po', '*.odt',
                 'icons/*.svg', 'tests/*.rst']),
+                'icons/*.svg', 'tests/*.rst'
+                'java/*', 'java/lib/*', 'java/fonts/*',
+                'java/com/*', 'java/com/nantic/*',
+                'java/com/nantic/jasperreports/*']
+            ),
         },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
