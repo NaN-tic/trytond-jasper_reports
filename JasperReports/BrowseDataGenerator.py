@@ -128,7 +128,7 @@ class CsvBrowseDataGenerator(BrowseDataGenerator):
                 for x in range(copies):
                     self.allRecords.append(new)
 
-        f = open(fileName, 'w+', encoding="utf-8")
+        f = open(fileName, 'w+', encoding='utf-8')
         try:
             csv.QUOTE_ALL = True
             # JasperReports CSV reader requires an extra colon at the end of

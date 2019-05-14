@@ -18,7 +18,7 @@ class CsvRecordDataGenerator(AbstractDataGenerator):
     # CSV file generation using a list of dictionaries provided by the parser
     # function.
     def generate(self, fileName):
-        f = open(fileName, 'w+')
+        f = open(fileName, 'w+', encoding='utf-8')
         try:
             csv.QUOTE_ALL = True
             fieldNames = self.report.fieldNames()
@@ -80,7 +80,7 @@ class XmlRecordDataGenerator(AbstractDataGenerator):
                 valueNode = self.document.createTextNode(value)
                 fieldNode.appendChild(valueNode)
         # Once created, the only missing step is to store the XML into a file
-        f = codecs.open(fileName, 'w+', 'utf-8')
+        f = codecs.open(fileName, 'w+', encoding='utf-8')
         try:
             topNode.writexml(f)
         finally:
