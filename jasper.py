@@ -89,7 +89,7 @@ class JasperReport(Report):
         # <subreportExpression>
         # <![CDATA[$P{SUBREPORT_DIR} + "report_name.jrxml"]]>
         # </subreportExpression>
-        e = re.compile('<subreportExpression>.*</subreportExpression>')
+        e = re.compile('<subreportExpression>.*?</subreportExpression>')
         subreports = e.findall(str(report_content))
         if subreports:
             for subreport in subreports:
