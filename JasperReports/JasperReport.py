@@ -5,10 +5,11 @@
 import os
 from lxml import etree
 import re
+import logging
 from trytond.config import config
 
 dataSourceExpressionRegExp = re.compile(r"""\$P\{(\w+)\}""")
-
+logger = logging.getLogger(__name__)
 
 class JasperReport:
     def __init__(self, fileName='', pathPrefix=''):
@@ -87,7 +88,7 @@ class JasperReport:
                 newPath.append(x.split('-')[-1])
             path = '/'.join(newPath)
             if path in fields:
-                print("WARNING: path '%s' already exists in report. This is " \
+                logger.warning("path '%s' already exists in report. This is " \
                     "not supported by the module. Offending fields: %s, %s" % (
                         path,
                         fields[path]['name'],
@@ -173,7 +174,7 @@ class JasperReport:
             try:
                 subreportExpression = eval(subreportExpression)
             except:
-                print("COULD NOT EVALUATE EXPRESSION: '%s'" % (
+                logger.error("COULD NOT EVALUATE EXPRESSION: '%s'" % (
                     subreportExpression))
                 # If we're not able to evaluate the expression
                 # go to next subreport
