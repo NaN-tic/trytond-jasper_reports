@@ -88,7 +88,6 @@ class JasperServer(UserWarning):
                 try:
                     return self.proxy.Report.execute(*args)
                 except (xmlrpc.client.ProtocolError, socket.error) as e:
-                    self.error("EXCEPTION: %s %s" % (str(e), str(e.args)))
                     pass
                 except xmlrpc.client.Fault as e:
                     self.error("EXCEPTION: %s %s" % (str(e), str(e.args)))
