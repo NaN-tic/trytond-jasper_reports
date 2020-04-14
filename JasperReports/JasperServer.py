@@ -2,6 +2,7 @@
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
 import os
+import signal
 import glob
 import time
 import socket
@@ -14,6 +15,8 @@ from trytond.exceptions import UserWarning
 
 
 class JasperServer(UserWarning):
+    pid = None
+
     def __init__(self, port=8090):
         self.port = port
         self.pidfile = None
@@ -68,12 +71,18 @@ class JasperServer(UserWarning):
             str(self.port),
             ]
         process = subprocess.Popen(command, env=env, cwd=cwd, close_fds=True)
+        JasperServer.pid = process.pid
         if self.pidfile:
-            f = open(self.pidfile, 'w')
-            try:
+            with open(self.pidfile, 'w') as f:
                 f.write(str(process.pid))
-            finally:
-                f.close()
+
+    @staticmethod
+    def stop():
+        if not JasperServer.pid:
+            return
+        os.kill(JasperServer.pid, signal.SIGTERM)
+        time.sleep(2)
+        os.kill(JasperServer.pid, signal.SIGKILL)
 
     def execute(self, *args):
         """
