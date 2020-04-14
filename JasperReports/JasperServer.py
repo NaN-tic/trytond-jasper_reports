@@ -81,7 +81,7 @@ class JasperServer(UserWarning):
         """
         try:
             return self.proxy.Report.execute(*args)
-        except (xmlrpc.client.ProtocolError, socket.error) as e:
+        except (xmlrpc.client.ProtocolError, socket.error):
             self.start()
             for x in range(40):
                 time.sleep(1)
@@ -93,5 +93,5 @@ class JasperServer(UserWarning):
                 except xmlrpc.client.Fault as e:
                     self.error("EXCEPTION: %s %s" % (str(e), str(e.args)))
                     raise
-        except xmlrpc.client.Fault as e:
+        except xmlrpc.client.Fault:
             raise
