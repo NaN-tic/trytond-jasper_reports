@@ -7,6 +7,7 @@ import time
 import tempfile
 import logging
 import subprocess
+import zipfile
 from io import BytesIO
 from urllib.parse import urlparse
 from PyPDF2 import PdfFileMerger, PdfFileReader
@@ -159,6 +160,19 @@ class JasperReport(Report):
             action_report = ActionReport(action_id)
 
         model = action_report.model or data.get('model')
+
+        # report single and len > 1, return zip file
+        if action_report.single and len(ids) > 1:
+            content = BytesIO()
+            with zipfile.ZipFile(content, 'w') as content_zip:
+                for id in ids:
+                    type, rcontent, _ = cls.render(action_report, data, model, [id])
+                    rfilename = '%s-%s.%s' % (
+                        action_report.name.replace('/', '-'), id, type)
+                    content_zip.writestr(rfilename, rcontent)
+            content = content.getvalue()
+            return ('zip', content, False, action_report.name)
+
         type, data, pages = cls.render(action_report, data, model, ids)
 
         if Transaction().context.get('return_pages'):
