@@ -18,6 +18,7 @@ from trytond.pool import Pool
 from trytond.transaction import Transaction
 from trytond.cache import Cache
 from trytond.modules import MODULES_PATH
+from trytond.tools import slugify
 
 from .JasperReports import JasperReport as JReport, JasperServer
 from .JasperReports import CsvRecordDataGenerator, CsvBrowseDataGenerator
@@ -160,6 +161,7 @@ class JasperReport(Report):
             action_report = ActionReport(action_id)
 
         model = action_report.model or data.get('model')
+        action_name = slugify(action_report.name)
 
         # report single and len > 1, return zip file
         if action_report.single and len(ids) > 1:
@@ -167,11 +169,10 @@ class JasperReport(Report):
             with zipfile.ZipFile(content, 'w') as content_zip:
                 for id in ids:
                     type, rcontent, _ = cls.render(action_report, data, model, [id])
-                    rfilename = '%s-%s.%s' % (
-                        action_report.name.replace('/', '-'), id, type)
+                    rfilename = '%s-%s.%s' % (action_name, id, type)
                     content_zip.writestr(rfilename, rcontent)
             content = content.getvalue()
-            return ('zip', content, False, action_report.name)
+            return ('zip', content, False, action_name)
 
         type, data, pages = cls.render(action_report, data, model, ids)
 
@@ -188,10 +189,9 @@ class JasperReport(Report):
 
             if Printer:
                 return Printer.send_report(type, bytearray(data),
-                    action_report.name, action_report)
+                    action_name, action_report)
 
-        return (type, bytearray(data), action_report.direct_print,
-            action_report.name)
+        return (type, bytearray(data), action_report.direct_print, action_name)
 
     @classmethod
     def render(cls, action_report, data, model, ids):
