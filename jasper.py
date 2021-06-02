@@ -162,12 +162,13 @@ class JasperReport(Report):
 
         model = action_report.model or data.get('model')
         action_name = action_report.name
-        filename = slugify(action_name)
+
         Model = Pool().get(model)
         records = Model.browse(ids)
-        filename = slugify('%s-%s' % (
-                    records[0].id, records[0].rec_name)
-                    if len(records) == 1 else action_name)
+        suffix = '-'.join(r.rec_name for r in records[:5])
+        if len(records) > 5:
+            suffix += '__' + str(len(records[5:]))
+        filename = slugify('%s-%s' % (action_name, suffix))
 
         # report single and len > 1, return zip file
         if action_report.single and len(ids) > 1:
@@ -176,7 +177,7 @@ class JasperReport(Report):
             with zipfile.ZipFile(content, 'w') as content_zip:
                 for id in ids:
                     type, rcontent, _ = cls.render(action_report, data, model, [id])
-                    rfilename = '%s-%s.%s' % (id, slugify(rec_names[id].rec_name), type)
+                    rfilename = '%s.%s' % (slugify(rec_names[id].rec_name), type)
                     content_zip.writestr(rfilename, rcontent)
             content = content.getvalue()
             return ('zip', content, False, filename)
