@@ -161,18 +161,25 @@ class JasperReport(Report):
             action_report = ActionReport(action_id)
 
         model = action_report.model or data.get('model')
-        action_name = slugify(action_report.name)
+        action_name = action_report.name
+        filename = slugify(action_name)
+        Model = Pool().get(model)
+        records = Model.browse(ids)
+        filename = slugify('%s-%s' % (
+                    records[0].id, records[0].rec_name)
+                    if len(records) == 1 else action_name)
 
         # report single and len > 1, return zip file
         if action_report.single and len(ids) > 1:
+            rec_names = dict((x.id, x) for x in records)
             content = BytesIO()
             with zipfile.ZipFile(content, 'w') as content_zip:
                 for id in ids:
                     type, rcontent, _ = cls.render(action_report, data, model, [id])
-                    rfilename = '%s-%s.%s' % (action_name, id, type)
+                    rfilename = '%s-%s.%s' % (id, slugify(rec_names[id].rec_name), type)
                     content_zip.writestr(rfilename, rcontent)
             content = content.getvalue()
-            return ('zip', content, False, action_name)
+            return ('zip', content, False, filename)
 
         type, data, pages = cls.render(action_report, data, model, ids)
 
@@ -189,9 +196,9 @@ class JasperReport(Report):
 
             if Printer:
                 return Printer.send_report(type, bytearray(data),
-                    action_name, action_report)
+                    filename, action_report)
 
-        return (type, bytearray(data), action_report.direct_print, action_name)
+        return (type, bytearray(data), action_report.direct_print, filename)
 
     @classmethod
     def render(cls, action_report, data, model, ids):
