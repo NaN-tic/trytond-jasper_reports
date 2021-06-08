@@ -177,7 +177,10 @@ class JasperReport(Report):
             with zipfile.ZipFile(content, 'w') as content_zip:
                 for id in ids:
                     type, rcontent, _ = cls.render(action_report, data, model, [id])
-                    rfilename = '%s.%s' % (slugify(rec_names[id].rec_name), type)
+                    rfilename = '%s-%s.%s' % (
+                        slugify(action_name),
+                        slugify(rec_names[id].rec_name),
+                        type)
                     content_zip.writestr(rfilename, rcontent)
             content = content.getvalue()
             return ('zip', content, False, filename)
