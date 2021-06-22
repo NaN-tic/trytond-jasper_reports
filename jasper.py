@@ -174,12 +174,15 @@ class JasperReport(Report):
         model = action_report.model or data.get('model')
         action_name = action_report.name
 
-        Model = Pool().get(model)
-        records = Model.browse(ids)
-        suffix = '-'.join(r.rec_name for r in records[:5])
-        if len(records) > 5:
-            suffix += '__' + str(len(records[5:]))
-        filename = slugify('%s-%s' % (action_name, suffix))
+        if model:
+            Model = Pool().get(model)
+            records = Model.browse(ids)
+            suffix = '-'.join(r.rec_name for r in records[:5])
+            if len(records) > 5:
+                suffix += '__' + str(len(records[5:]))
+            filename = slugify('%s-%s' % (action_name, suffix))
+        else:
+            filename = slugify(action_name)
 
         # report single and len > 1, return zip file
         if action_report.single and len(ids) > 1:
@@ -187,7 +190,8 @@ class JasperReport(Report):
             content = BytesIO()
             with zipfile.ZipFile(content, 'w') as content_zip:
                 for id in ids:
-                    type, rcontent, _ = cls.render(action_report, data, model, [id])
+                    type, rcontent, _ = cls.render(action_report, data, model,
+                        [id])
                     rfilename = '%s-%s.%s' % (
                         slugify(action_name),
                         slugify(rec_names[id].rec_name),
@@ -207,7 +211,8 @@ class JasperReport(Report):
             try:
                 Printer = pool.get(REDIRECT_MODEL)
             except KeyError:
-                logger.warning('Redirect model "%s" not found.', REDIRECT_MODEL)
+                logger.warning('Redirect model "%s" not found.',
+                    REDIRECT_MODEL)
 
             if Printer:
                 return Printer.send_report(type, bytearray(data),
