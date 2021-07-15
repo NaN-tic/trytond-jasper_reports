@@ -54,7 +54,7 @@ class JasperReport(Report):
     @classmethod
     def write_properties(cls, filename, properties):
         def display_unicode(data):
-            return "".join(["\\u%s" % hex(ord(l))[2:].zfill(4) for l in data])
+            return "".join(["\\u%s" % hex(ord(x))[2:].zfill(4) for x in data])
 
         with open(filename, 'w') as f:
             for key, value in properties.items():
@@ -172,30 +172,28 @@ class JasperReport(Report):
             action_report = ActionReport(action_id)
 
         model = action_report.model or data.get('model')
-        action_name = action_report.name
-
-        if model:
-            Model = Pool().get(model)
-            records = Model.browse(ids)
-            suffix = '-'.join(r.rec_name for r in records[:5])
-            if len(records) > 5:
-                suffix += '__' + str(len(records[5:]))
-            filename = slugify('%s-%s' % (action_name, suffix))
-        else:
-            filename = slugify(action_name)
+        # Limit the filename to 40 chars to ensure that Windows and
+        # Windows Office could open the file correctly. In general accept
+        # only 255 chars or less for the path + filename.
+        action_name = slugify(action_report.name)[:40]
 
         # report single and len > 1, return zip file
         if action_report.single and len(ids) > 1:
+            Model = Pool().get(model)
+            records = Model.browse(ids)
             rec_names = dict((x.id, x) for x in records)
+            suffix = '-'.join(r.rec_name for r in records[:5])
+            filename = slugify('%s-%s' % (action_name, suffix))
+            filename = filename[:40]
             content = BytesIO()
             with zipfile.ZipFile(content, 'w') as content_zip:
                 for id in ids:
                     type, rcontent, _ = cls.render(action_report, data, model,
                         [id])
-                    rfilename = '%s-%s.%s' % (
+                    rfilename = '%s-%s' % (
                         slugify(action_name),
-                        slugify(rec_names[id].rec_name),
-                        type)
+                        slugify(rec_names[id].rec_name))
+                    rfilename = '%s.%s' % (rfilename[:40], type)
                     content_zip.writestr(rfilename, rcontent)
             content = content.getvalue()
             return ('zip', content, False, filename)
@@ -216,9 +214,9 @@ class JasperReport(Report):
 
             if Printer:
                 return Printer.send_report(type, bytearray(data),
-                    filename, action_report)
+                    action_name, action_report)
 
-        return (type, bytearray(data), action_report.direct_print, filename)
+        return (type, bytearray(data), action_report.direct_print, action_name)
 
     @classmethod
     def render(cls, action_report, data, model, ids):
