@@ -114,7 +114,7 @@ class JasperReport(Report):
         if not report_content:
             raise Exception('Error', 'Missing report file!')
 
-        fname = os.path.split(report.report)[-1]
+        fname = os.path.split(report.report or '')[-1]
         basename = fname.split('.')[0]
         jrxml_path = os.path.join(path, fname)
         f = open(jrxml_path, 'wb')
