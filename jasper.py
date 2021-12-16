@@ -7,6 +7,7 @@ import time
 import tempfile
 import logging
 import subprocess
+import xmlrpc
 import zipfile
 from io import BytesIO
 from urllib.parse import urlparse
@@ -20,6 +21,7 @@ from trytond.transaction import Transaction
 from trytond.cache import Cache
 from trytond.modules import MODULES_PATH
 from trytond.tools import slugify
+from trytond.exceptions import UserError
 
 from .JasperReports import JasperReport as JReport, JasperServer
 from .JasperReports import CsvRecordDataGenerator, CsvBrowseDataGenerator
@@ -198,7 +200,10 @@ class JasperReport(Report):
             content = content.getvalue()
             return ('zip', content, False, filename)
 
-        type, data, pages = cls.render(action_report, data, model, ids)
+        try:
+            type, data, pages = cls.render(action_report, data, model, ids)
+        except xmlrpc.client.Fault as e:
+            raise UserError(str(e))
 
         if Transaction().context.get('return_pages'):
             return (type, bytearray(data), action_report.direct_print,
