@@ -132,16 +132,16 @@ class JasperReport(Report):
                     ]))
 
         for lang in Lang.search([('translatable', '=', True)]):
-            Transaction().set_context(language=lang.code)
-            translate = TranslateFactory(cls.__name__, Translation)
+            with Transaction().set_context(language=lang.code):
+                translate = TranslateFactory(cls.__name__, Translation)
 
-            properties = dict()
-            for key in keys:
-                properties[key] = translate(key)
+                properties = dict()
+                for key in keys:
+                    properties[key] = translate(key)
 
-            pfile = os.path.join(path, '%s_%s.properties' % (
-                    basename, lang.code.lower()))
-            cls.write_properties(pfile, properties)
+                pfile = os.path.join(path, '%s_%s.properties' % (
+                        basename, lang.code.lower()))
+                cls.write_properties(pfile, properties)
 
         cls._get_report_file_cache.set(report.id, jrxml_path)
         return jrxml_path
