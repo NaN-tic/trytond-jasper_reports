@@ -230,6 +230,7 @@ public class JasperServer {
             exporterConfiguration.setRemoveEmptySpaceBetweenRows(Boolean.TRUE);
             exporterConfiguration.setDetectCellType(Boolean.TRUE);
             exporterConfiguration.setWhitePageBackground(Boolean.TRUE);
+            exporterConfiguration.setMaxRowsPerSheet(65535);
             exporter.setConfiguration(exporterConfiguration);
 		} else if ( output.equalsIgnoreCase( "rtf" ) ) {
 			exporter = new JRRtfExporter();
