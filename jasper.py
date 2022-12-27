@@ -11,7 +11,7 @@ import xmlrpc
 import zipfile
 from io import BytesIO
 from urllib.parse import urlparse
-from PyPDF2 import PdfFileMerger, PdfFileReader
+from PyPDF2 import PdfMerger, PdfReader
 
 from trytond.report import Report
 from trytond.report.report import TranslateFactory
@@ -377,10 +377,10 @@ class JasperReport(Report):
 
     @classmethod
     def merge_pdfs(cls, pdfs_data):
-        merger = PdfFileMerger()
+        merger = PdfMerger()
         for pdf_data in pdfs_data:
             tmppdf = BytesIO(pdf_data)
-            merger.append(PdfFileReader(tmppdf))
+            merger.append(PdfReader(tmppdf))
             tmppdf.close()
 
         if COMPACT_ON_MERGE:
