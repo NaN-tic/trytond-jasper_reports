@@ -11,7 +11,11 @@ import xmlrpc
 import zipfile
 from io import BytesIO
 from urllib.parse import urlparse
-from PyPDF2 import PdfMerger, PdfReader
+
+try:
+    from PyPDF2 import PdfMerger, PdfReader
+except ImportError:
+    from PyPDF2 import PdfFileMerger as PdfMerger, PdfFileReader as PdfReader
 
 from trytond.report import Report
 from trytond.report.report import TranslateFactory
