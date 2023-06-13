@@ -67,6 +67,8 @@ class JasperServer(UserWarning):
         command = [
             'java',
             '-Djava.awt.headless=true',
+            '--add-opens',
+            'java.base/java.lang=ALL-UNNAMED',
             'com.nantic.jasperreports.JasperServer',
             str(self.port),
             ]
