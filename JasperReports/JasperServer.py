@@ -71,6 +71,8 @@ class JasperServer(UserWarning):
             'java.base/java.lang=ALL-UNNAMED',
             '--add-opens',
             'java.base/java.util=ALL-UNNAMED',
+            '--add-opens',
+            'java.base/java.text=ALL-UNNAMED',
             'com.nantic.jasperreports.JasperServer',
             str(self.port),
             ]
