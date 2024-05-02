@@ -11,12 +11,7 @@ import xmlrpc
 import zipfile
 from io import BytesIO
 from urllib.parse import urlparse
-
-try:
-    from PyPDF2 import PdfMerger, PdfReader
-except ImportError:
-    from PyPDF2 import PdfFileMerger as PdfMerger, PdfFileReader as PdfReader
-
+from pypdf import PdfMerger, PdfReader
 from trytond.report import Report
 from trytond.report.report import TranslateFactory
 from trytond.config import config as config_
