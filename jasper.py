@@ -146,6 +146,23 @@ class JasperReport(Report):
         return jrxml_path
 
     @classmethod
+    def get_action(cls, data):
+        pool = Pool()
+        ActionReport = pool.get('ir.action.report')
+
+        action_id = data.get('action_id')
+        if action_id is None:
+            action_reports = ActionReport.search([
+                    ('report_name', '=', cls.__name__)
+                    ])
+            assert action_reports, '%s not found' % cls
+            action = action_reports[0]
+        else:
+            action = ActionReport(action_id)
+
+        return action, action.model or data.get('model')
+
+    @classmethod
     def execute(cls, ids, data):
         '''
         Execute the report on record ids.
@@ -157,22 +174,9 @@ class JasperReport(Report):
             a boolean to direct print,
             the report name
         '''
-        pool = Pool()
-        ActionReport = pool.get('ir.action.report')
-        cls.check_access()
+        action_report, model = cls.get_action(data)
+        cls.check_access(action_report, model, ids)
 
-        action_id = data.get('action_id')
-
-        if action_id is None:
-            action_reports = ActionReport.search([
-                    ('report_name', '=', cls.__name__)
-                    ])
-            assert action_reports, '%s not found' % cls
-            action_report = action_reports[0]
-        else:
-            action_report = ActionReport(action_id)
-
-        model = action_report.model or data.get('model')
         # Limit the filename to 40 chars to ensure that Windows and
         # Windows Office could open the file correctly. In general accept
         # only 255 chars or less for the path + filename.
