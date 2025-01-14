@@ -174,6 +174,8 @@ class JasperReport(Report):
             a boolean to direct print,
             the report name
         '''
+        pool = Pool()
+
         action_report, model = cls.get_action(data)
         cls.check_access(action_report, model, ids)
 
@@ -184,7 +186,7 @@ class JasperReport(Report):
 
         # report single and len > 1, return zip file
         if action_report.single and len(ids) > 1:
-            Model = Pool().get(model)
+            Model = pool.get(model)
             records = Model.browse(ids)
             rec_names = dict((x.id, x) for x in records)
             suffix = '-'.join(r.rec_name for r in records[:5])
