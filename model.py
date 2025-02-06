@@ -61,7 +61,7 @@ class Model(metaclass=PoolMeta):
         pool = Pool()
         IrModel = pool.get('ir.model')
 
-        model = IrModel.search([('model', '=', model)])[0]
+        model = IrModel.search([('name', '=', model)])[0]
 
         fieldNode = document.createElement('id')
         parentNode.appendChild(fieldNode)
