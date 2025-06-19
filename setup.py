@@ -40,7 +40,7 @@ major_version, minor_version, _ = version.split('.', 2)
 major_version = int(major_version)
 minor_version = int(minor_version)
 
-requires = []
+requires = ['PyPDF2']
 for dep in info.get('depends', []):
     if not re.match(r'(ir|res)(\W|$)', dep):
         prefix = MODULE2PREFIX.get(dep, 'trytond')
@@ -74,11 +74,15 @@ setup(name='%s_%s' % (PREFIX, MODULE),
     package_dir={'trytond.modules.%s' % MODULE: '.'},
     packages=[
         'trytond.modules.%s' % MODULE,
+        'trytond.modules.%s.JasperReports' % MODULE,
         'trytond.modules.%s.tests' % MODULE,
         ],
     package_data={
         'trytond.modules.%s' % MODULE: (info.get('xml', [])
-            + ['tryton.cfg', 'view/*.xml', 'locale/*.po', 'tests/*.rst']),
+            + ['tryton.cfg', 'view/*.xml', 'locale/*.po', 'tests/*.rst',
+               'java/*', 'java/lib/*', 'java/fonts/*', 'java/com/*',
+               'java/com/nantic/*', 'java/com/nantic/jasperreports/*',
+            ]),
         },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
