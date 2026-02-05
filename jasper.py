@@ -136,7 +136,7 @@ class JasperReport(Report):
 
                 properties = dict()
                 for key in keys:
-                    properties[key] = translate(key)
+                    properties[key] = translate.gettext(key)
 
                 pfile = os.path.join(path, '%s_%s.properties' % (
                         basename, lang.code.lower()))
