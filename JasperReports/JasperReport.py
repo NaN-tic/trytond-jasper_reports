@@ -2,6 +2,7 @@
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
 
+import ast
 import os
 from lxml import etree
 import re
@@ -10,6 +11,18 @@ from trytond.config import config
 
 dataSourceExpressionRegExp = re.compile(r"""\$P\{(\w+)\}""")
 logger = logging.getLogger(__name__)
+
+
+def _eval_string_expression(expression):
+    def _eval(node):
+        if isinstance(node, ast.Expression):
+            return _eval(node.body)
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            return node.value
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+            return _eval(node.left) + _eval(node.right)
+        raise ValueError('Unsupported expression: %s' % expression)
+    return _eval(ast.parse(expression, mode='eval'))
 
 class JasperReport:
     def __init__(self, fileName='', pathPrefix=''):
@@ -124,7 +137,8 @@ class JasperReport:
         if relationTags and 'value' in relationTags[0].keys():
             relation = relationTags[0].get('value').strip()
             if relation.startswith('['):
-                self._relations = eval(relationTags[0].get('value'))
+                self._relations = ast.literal_eval(
+                    relationTags[0].get('value'))
             else:
                 self._relations = [x.strip() for x in relation.split(',')]
             self._relations = [self._pathPrefix + x for x in self._relations]
@@ -172,7 +186,8 @@ class JasperReport:
             subreportExpression = subreportExpression.replace(
                 '$P{SUBREPORT_DIR}', '"%s"' % self.subreportDirectory())
             try:
-                subreportExpression = eval(subreportExpression)
+                subreportExpression = _eval_string_expression(
+                    subreportExpression)
             except:
                 logger.error("COULD NOT EVALUATE EXPRESSION: '%s'" % (
                     subreportExpression))
@@ -272,7 +287,8 @@ class JasperReport:
             if relationTags and 'value' in relationTags[0].keys():
                 relation = relationTags[0].get('value').strip()
                 if relation.startswith('['):
-                    relations = eval(relationTags[0].get('value'))
+                    relations = ast.literal_eval(
+                        relationTags[0].get('value'))
                 else:
                     relations = [x.strip() for x in relation.split(',')]
                 relations = [self._pathPrefix + x for x in relations]
