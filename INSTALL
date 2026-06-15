@@ -38,7 +38,7 @@ You can add in your Tryton server configuration file (trytond.conf) this params:
  
 Determines the port where the JasperServer process should listen with its XML-RPC server for incomming calls
 
- * jasperpid. Default tryton-jasper.pid
+ * jasperpid. Default tryton-jasper.pid inside database path
  
 Determines the file name where the process ID of the JasperServer process should be stored
 
