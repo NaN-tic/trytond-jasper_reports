@@ -37,6 +37,8 @@ PORT = config_.getint('jasper', 'port', default=8090)
 # Determines the file name where the process ID of the JasperServer
 # process should be stored
 PID = config_.get('jasper', 'pid', default='tryton-jasper.pid')
+if not os.path.isabs(PID):
+    PID = os.path.join(config_.get('database', 'path'), PID)
 
 # Determines if temporary files will be removed
 UNLINK = config_.getboolean('jasper', 'unlink', default=True)
