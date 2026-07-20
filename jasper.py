@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 from pypdf import PdfReader, PdfWriter
 from trytond.report import Report
 from trytond.report.report import TranslateFactory
-from trytond.config import config as config_
+import trytond.config as config_
 from trytond.pool import Pool
 from trytond.transaction import Transaction
 from trytond.cache import Cache
