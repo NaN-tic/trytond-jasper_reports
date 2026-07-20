@@ -6,8 +6,7 @@ import os
 from lxml import etree
 import re
 import logging
-from trytond.config import config
-
+import trytond.config as config
 dataSourceExpressionRegExp = re.compile(r"""\$P\{(\w+)\}""")
 logger = logging.getLogger(__name__)
 
