@@ -10,7 +10,7 @@ import subprocess
 import xmlrpc.client
 import logging
 
-from trytond.config import config
+import trytond.config as config
 from trytond.exceptions import UserWarning
 
 
